@@ -113,6 +113,7 @@ sqoop export \
 --export-dir /user/hive/warehouse/yig/*
 
 --------------------------------------------------
+--------------------------------------------------------------------------------------------
 mysql数据导入到hive表文件格式为 parquet
 mysql中有数据 
 
@@ -123,13 +124,16 @@ sqoop import \
 --password root \
 --table tt1 \
 --fields-terminated-by ' ' \
---target-dir /user/hive/warehouse/sqooppar6
+--target-dir /user/hive/warehouse/sqooppar61 \
+--as-parquetfile \
+-m 1 
 
 建立hive表 
-create table sqooppar7(
+create table sqooppar61(
 id int,
 name string,
 hoddy string
 )
-row format delimited fields terminated by ' ';
-locatioin '/user/hive/warehouse/sqooppar7'; //不要指定分隔符 
+row format delimited fields terminated by ' '
+stored as parquetfile;
+select*from sqooppar61;
