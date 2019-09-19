@@ -1,0 +1,27 @@
+
+安装的netcat
+安装flume
+-------------------------------------------------------------------------------------------
+netcat.conf
+a1.sources = r1
+a1.sinks = k1
+a1.channels = c1
+a1.sources.r1.type = netcat
+a1.sources.r1.bind = localhost
+a1.sources.r1.port = 44446
+a1.sinks.k1.type = logger
+a1.channels.c1.type = memory
+a1.channels.c1.capacity = 1000
+a1.channels.c1.transactionCapacity = 100
+a1.sources.r1.channels = c1
+a1.sinks.k1.channel = c1
+
+-------------------------------------------------------------------------------------------
+执行 flume
+ ../bin/flume-ng agent -n a1 -c conf -f netcat.conf -Dflume.root.logger=DEBUG,console
+ 
+开启另一台终端
+ 开启 netcat 
+  nc localhost 44446
+ 
+
