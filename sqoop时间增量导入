@@ -1,0 +1,33 @@
+建立mysql表
+create table sqoop1(
+id int,
+name varchar(10),
+ts timestamp)
+
+sqoop import \
+--connect jdbc:mysql://localhost:3306/test \
+--driver com.mysql.jdbc.Driver \
+--username root \
+--password root \
+--table sqoopadd \
+--columns "id,name,ts" \
+--check-column ts \
+--incremental lastmodified \
+--last-value "2019-09-19 21:16:40" \
+--as-textfile \
+--target-dir  /user/hive/warehouse/addsqoop \
+--fields-terminated-by ' ' \
+-m  1 \
+--append
+
+create table addsqoop
+(id int,name string ,ts timestamp)
+row format delimited fields terminated by ' ';
+==============================保证每次修改时间都是最新的--incremental lastmodified 
+
+过程 先将--incremental lastmodified 设置为较早的时间执行sqoop让表将以前的数据导入 
+select hive表 中有以前的数据
+往数据库中添加数据 --incremental lastmodified 时间戳为最新的 再次使用sqoop导入数据 
+浏览hive表 增加的语句被增量导入 （--incremental lastmodified 时间戳导入之后的）
+
+
