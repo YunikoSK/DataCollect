@@ -1,0 +1,30 @@
+exec->memory->logger
+使用tail -F 文件 监视指定文件 当问文件内容发生改变以后产生日志显示到控制台
+
+exec2logger.job
+# 组件的定义 
+a1.sources = r1
+a1.sinks = k1
+a1.channels = c1
+# 配置source 
+a1.sources.r1.type = exec
+# 配置时保证文件存在
+a1.sources.r1.command = tail -F /home/hadoop/flume-1.6.0/resdir
+# 配置sinks 的属性
+a1.sinks.k1.type = logger
+# 配置channel 属性 
+a1.channels.c1.type = memory
+a1.channels.c1.capacity = 10000
+a1.channels.c1.transcationCapacity = 10000
+#绑定source 与sink 于 channel 
+a1.sources.r1.channels = c1
+a1.sinks.k1.channel = c1 
+# 一个源可以对应多个通道 一个通道只能对应一个 sink （落地）
+
+
+启动 
+flume-ng agent -c conf/  -f conf/exec2logger.conf -n a1 -Dflume.root.logger=INFO,console
+-c 指定配置conf位置
+-f 执行 作业的位置
+-n 指定agent的名字
+-Dflume.root.logger=INFO,console 日志打印在控制台 
