@@ -1,0 +1,135 @@
+sqoop list-tables \
+--connect jdbc:mysql://hadoop1:3306/test \
+--username root --password root;
+
+sqoop import --connect jdbc:mysql://hadoop1:3306/test \
+--username root --password root \
+--table emp -m 1
+
+
+----------sqoop 建立分区表 导入数据到hive分区表 -----------------------
+create table sqooppar1(
+id int,
+name string,
+hoddy string,
+date1 timestamp 
+)
+partitioned by (dt string)
+row format  delimited  fields terminated by ' '
+stored as parquet;
+
+创建mysql表 sqoop1
+create table sqoop1(
+id int,
+name varchar(10),
+hoddy varchar(10),
+date1 timestamp,
+dt string)
+
+--driver com.mysql.jdbc.Driver \
+
+--query 'select id,name,hoddy,date1 from sqoop1 WHERE dt=2015 and $CONDITIONS'\
+
+
+sqoop import \
+--connect jdbc:mysql://hadoop1:3306/test \
+--driver com.mysql.jdbc.Driver \
+--username root \
+--password root \
+--query 'select id,name,hoddy,date1 from sqoop1 WHERE dt=2014 and $CONDITIONS' \
+--split-by id \
+--target-dir /user/hive/warehouse/sqooppar3 \
+--fields-terminated-by ' ' \
+--hive-partition-key DT \
+--hive-partition-value 2014 
+
+create table sqooppar3(
+id int,
+name string,
+hoddy string,
+date1 timestamp 
+)
+row format  delimited  fields terminated by ' '
+
+==========================================================
+导入1个G的数据到hdfs中？？？
+----------------------------
+建立tt表 
+create table tt
+(id int,name varchar(10),sal varchar())
+
+-------------------------------------------------------
+建立mysql存储过程 
+BEGIN
+DECLARE count INT(11);
+DECLARE i INT(11);
+DECLARE name VARCHAR(20);
+DECLARE sal VARCHAR(20);
+
+SET count = 100;
+SET i =0;
+WHILE i < count DO
+SET name = CONCAT('1510A',i);
+SET sal = ROUND(ROUND(RAND(),2)*100,2);
+INSERT INTO `tt`(`NAME`,sal) VALUES (name,sal);
+SET i = i+1;
+END WHILE;
+END
+---------------------------------------------------
+sqoop import \
+--connect jdbc:mysql://hadoop1:3306/test \
+--driver com.mysql.jdbc.Driver \
+--table tt \
+--fields-terminated-by ' ' \
+--username root \
+--password root \
+--split-by id \
+--target-dir /user/hive/warehouse/yig
+-------------------------------------------
+
+create table yig(
+id int,
+name string,
+sal string
+)
+row format  delimited  fields terminated by ' ';
+------------------------------------------------
++++++++++++++++++++++++++++++++++++++++++++++++++
+hive -> mysql 
+建立mysql表
+
+create  table tt1 
+(id int,name varchar(10),sal varchar(10))
+
+------------------------------------------------
+sqoop export \
+--connect jdbc:mysql://hadoop1:3306/test \
+--username root \
+--password root \
+--table tt1 \
+--input-null-string '' \
+--input-null-non-string '' \
+--fields-terminated-by ' ' \
+--export-dir /user/hive/warehouse/yig/*
+
+--------------------------------------------------
+mysql数据导入到hive表文件格式为 parquet
+mysql中有数据 
+
+sqoop import \
+--connect jdbc:mysql://hadoop1:3306/test \
+--driver com.mysql.jdbc.Driver \
+--username root \
+--password root \
+--table tt1 \
+--fields-terminated-by ' ' \
+--target-dir /user/hive/warehouse/sqooppar6
+
+建立hive表 
+create table sqooppar7(
+id int,
+name string,
+hoddy string
+)
+row format delimited fields terminated by ' ';
+locatioin '/user/hive/warehouse/sqooppar7'; //不要指定分隔符 
