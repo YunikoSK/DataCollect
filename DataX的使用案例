@@ -31,7 +31,13 @@ END WHILE;
 END
 
 
-
+-----------------------
+执行脚本 datax.py -r readername -w writername
+产生指定json格式 
+运行json 
+ datax.py的位置 json位置 
+ eg: ../bin/datax.py  mysql2hive.json 
+-----------------------
 --------------------------mysql 到 hive --------------------------------
 
 {
