@@ -1,0 +1,18 @@
+Flume 
+>>高可用的，高可靠的，分布式的海量日志采集、聚合和传输的系统
+
+flume组件
+source ： 数据源组件，专门读取相对应的数据，并将数据传到channel中.
+channel : 管道，用于连接source和sink
+sink ： 数据下沉组件，用于将channel中的数据持久化到对应的文件系统中或者流中。
+agent ： flume的运行单元，里面必须包含一个或者多个source、channel、sink，运行在单个jvm中。
+event ： 事件，是数据的描述。
+interceptor ： 拦截器，作用于source阶段，用于过滤数据。
+selectorer ： 选择器，作用于source阶段，默认是replicating，也就是复用功能。mutiplxing
+groupsinks ： sink组，用于将多个sink选择sink。
+
+常见组件
+source常用组件：exec、avro source 、 spooling dirctory 、kafka 、netcat 、http、自定义
+channel常用：memory 、 file 、kafka 、 jdbc
+sinks常用 ： logger 、avro 、 hdfs 、hive 、hbase、kafka等
+
