@@ -1,0 +1,43 @@
+正则表达式对域的抽取
+
+日志的情况 
+
+220.181.108.151 - - [31/Jan/2012:00:02:32 +0800] "GET /home.php?mod=space&uid=158&do=album&view=me&from=space HTTP/1.1" 200 8784 "-" "Mozilla/5.0 (compatible; Baiduspider/2.0; +http://www.baidu.com/search/spider.html)"
+
+(.*) - - (.*) (.*)(GET|POST) /(.*)$
+
+--------------------------------------------------------------------------------------------------------------------------------
+       //定义一个正则表达式
+        String reg = "^([0-9.]+\\d+) - - \\[(.* \\+\\d+)\\] .+(GET|POST) (.+) (HTTP)\\S+ (\\d+) .+\\\"(\\w+).+$";
+
+        //获取一个模式匹配器
+        Pattern pattern = Pattern.compile(reg);
+
+        //匹配结果
+        Matcher matcher = pattern.matcher(log);
+
+        //
+        StringBuffer sb = new StringBuffer();
+
+        //判断数据是否匹配上
+        if (matcher.find()){
+            //先获取匹配的段数
+            int count = matcher.groupCount();
+            //循环获取每段的内容，并且将内容拼接起来
+            for (int i = 1; i <= count; i++) {
+                //判断字段是否是时间字段，如果是，则做时间格式转换
+                if (i == 2){
+                    //定义一个时间格式来解析当前时间
+                    Date d = new SimpleDateFormat("dd/MMM/yyyy:HH:mm:ss Z", Locale.ENGLISH).parse(matcher.group(i));
+MMM 英国
+                    //定义输出的时间格式
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd hhmmss");
+
+                    //将时间格式转换成输出格式，并输出
+                    sb.append(sdf.format(d) + "\t");
+                } else {
+                    sb.append(matcher.group(i) + "\t");
+                }
+            }
+        }
+        return sb.toString();
