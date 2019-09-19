@@ -1,19 +1,22 @@
-使用datax的实现datax的和mysql的数据互导
+# 使用datax的实现datax的和mysql的数据互导
 --------------------------------------------------------------------------
-hive 建表语句
+## 准备
+###  hive 建表语句
+
 create table sqooppar7(
 id int,
 name string,
 hoddy string
 )
+
 row format delimited fields terminated by ' ';
 
-mysql 建表语句
+## mysql 建表语句
 create  table tt1 
 (id int,
 name varchar(10),
 sal varchar(10))
-mysql 存储过程 实现创建多条数据
+## mysql 存储过程 实现创建多条数据
 BEGIN
 DECLARE count INT(11);
 DECLARE i INT(11);
@@ -32,6 +35,7 @@ END
 
 
 -----------------------
+## 执行 
 执行脚本 datax.py -r readername -w writername
 产生指定json格式 
 运行json 
