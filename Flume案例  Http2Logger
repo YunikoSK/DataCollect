@@ -1,0 +1,25 @@
+flume案例  http + memory + logger
+
+http2logger.conf 
+a1.sources = r1
+a1.channels = c1
+a1.sinks = s1
+# 指定源类型 HTTPSources 端口 以及 主机 
+a1.sources.r1.type = org.apache.flume.source.http.HTTPSource
+a1.sources.r1.port = 6668
+a1.sources.r1.bind = hadoop1
+a1.channels.c1.type = memory
+a1.channels.c1.capacity = 1000
+a1.channels.c1.transactionCapacity =100
+a1.channels.c1.keep-alive = 3
+a1.channels.c1.byteCapacityBufferPercentage = 20
+a1.channels.c1.byteCapacity = 800000
+a1.sinks.s1.type = logger
+a1.sources.r1.channels = c1
+a1.sinks.s1.channel = c1
+
+执行 
+flume-ng agent -c ../conf/ -f ../example/http2logger.conf  -n a1 -Dflume.root.logger=INFO,console
+使用 curl 向 hadoop1：6668发送指令 
+curl -X POST -d '[{"headers":{"time":"2017-09-02"},"body":"this is http"}]' http://hadoop1:6668
+控制台会打印发送的指令 
