@@ -1,0 +1,78 @@
+hdfs
+----hadoop1
+----hadoop2
+----hadoop3
+hadoop3为master 
+ hadoop1为slave1
+ hadoop2为slave2
+
+在hadoop3上 
+first-masterjob
+-----文件内容 
+a1.sources=r1
+a1.channels=c1
+a1.sinks=s1
+a1.sources.r1.type=avro
+a1.sources.r1.port=6666
+a1.sources.r1.bind= 192.168.248.132
+a1.channels.c1.type=memory
+a1.channels.c1.capacity=1000
+a1.channels.c1.transactionCapacity=100
+a1.channels.c1.keep-alive=3
+a1.channels.c1.byteCapacityBufferPercentage = 20
+a1.channels.c1.byteCapacity = 800000
+a1.sinks.s1.type =logger
+a1.sources.r1.channels=c1
+a1.sinks.s1.channel=c1
+-------------------------------------------------------------------------
+在hadoop2上
+first-slave2ob
+a1.sources=r1
+a1.channels=c1
+a1.sinks=s1
+a1.sources.r1.type=syslogtcp
+a1.sources.r1.port=6666
+a1.sources.r1.host=hadoop2
+a1.channels.c1.type=memory
+a1.channels.c1.capacity=1000
+a1.channels.c1.transactionCapacity=100
+a1.channels.c1.keep-alive=3
+a1.channels.c1.byteCapacityBufferPercentage = 20
+a1.channels.c1.byteCapacity = 800000
+a1.sinks.s1.type =avro
+a1.sinks.s1.hostname=hadoop3
+a1.sinks.s1.port=6666
+a1.sources.r1.channels=c1
+a1.sinks.s1.channel=c1
+----------------------------------------------------------------------------
+在hadoop1机器上
+first-slave1job
+a1.sources=r1
+a1.channels=c1
+a1.sinks=s1
+
+a1.sources.r1.type=syslogtcp
+a1.sources.r1.port=6666
+a1.sources.r1.host=hadoop1
+
+a1.channels.c1.type=memory
+a1.channels.c1.capacity=1000
+a1.channels.c1.transactionCapacity=100
+a1.channels.c1.keep-alive=3
+a1.channels.c1.byteCapacityBufferPercentage = 20
+a1.channels.c1.byteCapacity = 800000
+
+a1.sinks.s1.type = avro
+a1.sinks.s1.hostname = hadoop3
+a1.sinks.s1.port = 6666
+
+a1.sources.r1.channels=c1
+a1.sinks.s1.channel=c1
+
+---------------------------------------------------------------------------
+启动
+必须先启动 master 
+
+然后启动slave1 slave2
+
+
