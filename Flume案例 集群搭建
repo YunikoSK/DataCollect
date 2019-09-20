@@ -1,3 +1,4 @@
+Flume集群搭建 使用 hadoop3 为master 使用 hadoop2为 slave1  hadoop3 为 slave2
 hdfs
 ----hadoop1
 ----hadoop2
@@ -71,8 +72,17 @@ a1.sinks.s1.channel=c1
 
 ---------------------------------------------------------------------------
 启动
-必须先启动 master 
-
+必须先启动 master
+ ../bin/flume-ng agent -c ../conf/ -f ./first-masterjob -n a1 -Dflume.root.logger=INFO,console
 然后启动slave1 slave2
+hadoop1
+ ../bin/flume-ng agent -c ../conf/ -f ./first-slave1job -n a1 -Dflume.root.logger=INFO,console &
+hadoop2
+ ../bin/flume-ng agent -c ../conf/ -f ./first-slave2job -n a1 -Dflume.root.logger=INFO,console &
+在hadoop1机器上 向 本机的端口6666发送 
+ echo "nihao hadoop3 woshi hadoop1 " | nc localhost 6666
+ echo "nihao hadoop3 woshi hadoop2 " | nc localhost 6666
+观察hadoop3的日志接收情况 
+
 
 
