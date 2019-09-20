@@ -1,0 +1,54 @@
+exec2loggerOrhdfs.conf
+
+a1.sources=r1
+a1.channels=c1 c2
+a1.sinks=s1 s2
+
+#Flume内置两种选择器，replicating 和 multiplexing，如果Source配置中没有指定选择器，
+# 那么会自动使用复制Channel选择器。
+
+a1.sources.r1.type=exec
+a1.sources.r1.command= tail -f /home/hadoop/flume-1.6.0/res
+# 默认复制Channel
+a1.sources.r1.selector.type = replicating
+# 可选的通道集 如果 c2 没有发送成功也不会报错
+a1.sources.r1.selector.optional = c2
+# c1 通道的设置
+a1.channels.c1.type=memory
+a1.channels.c1.capacity=1000
+a1.channels.c1.transactionCapacity=100
+a1.channels.c1.keep-alive=3
+a1.channels.c1.byteCapacityBufferPercentage = 20
+a1.channels.c1.byteCapacity = 800000
+# c2 通道的设置
+a1.channels.c2.type=memory
+a1.channels.c2.capacity=1000
+a1.channels.c2.transactionCapacity=100
+a1.channels.c2.keep-alive=3
+a1.channels.c2.byteCapacityBufferPercentage = 20
+a1.channels.c2.byteCapacity = 800000
+# s1 的下沉类型
+a1.sinks.s1.type = logger
+# s2 的下沉类型
+a1.sinks.s2.type = hdfs
+a1.sinks.s2.hdfs.path = /flume/eventcopy/%y-%m-%d/%H%M/%S
+a1.sinks.s2.hdfs.filePrefix = event-
+a1.sinks.s2.hdfs.fileSuffix=.log
+a1.sinks.s2.hdfs.inUseSuffix=.tmp
+a1.sinks.s2.hdfs.rollInterval=2
+a1.sinks.s2.hdfs.rollSize=1024
+a1.sinks.s2.hdfs.fileType=DataStream
+a1.sinks.s2.hdfs.writeFormat=Text
+a1.sinks.s2.hdfs.round = true
+a1.sinks.s2.hdfs.roundValue = 1
+a1.sinks.s2.hdfs.roundUnit = second
+a1.sinks.s2.hdfs.useLocalTimeStamp=true
+# 为源头指定 双通道 c2 为可选
+a1.sources.r1.channels=c1 c2
+a1.sinks.s1.channel=c1
+a1.sinks.s2.channel=c2
+
+启动 
+flume-ng agent -c ../conf/ -f ../example/exec2loggerOrhdfs.conf  -n a1 -Dflume.root.logger=INFO,console
+追加内容 
+echo "s111341451345134514">>res
