@@ -1,0 +1,27 @@
+flume案例 syslogtcp + memory + logger 
+
+syslogTCP2logger.conf
+
+a1.sources = r1
+a1.channels = c1
+a1.sinks = s1
+
+#指定源 syslogtcp 端口 6666 主机 hadoop1
+a1.sources.r1.type = syslogtcp
+a1.sources.r1.port = 6666
+a1.sources.r1.host = hadoop1
+a1.channels.c1.type=memory
+a1.channels.c1.capacity = 1000
+a1.channels.c1.transactioinCapactiy = 100
+a1.channels.c1.keep-alive = 3
+a1.channels.c1.byteCapacityBufferPercentage = 20
+a1.channels.c1.byteCapacity = 800000
+a1.sinks.s1.type = logger
+a1.sources.r1.channels = c1
+a1.sinks.s1.channel = c1
+
+执行
+flume-ng agent -c ../conf/ -f ../example/syslogTCP2logger.conf  -n a1 -Dflume.root.logger=INFO,console
+
+往 hadoop1中 6666 端口发送内容  
+echo "hello yuniko1" | nc hadoop1 6666
