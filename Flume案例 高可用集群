@@ -1,0 +1,102 @@
+
+
+
+使用 flume实现高可用 failover 故障转移 
+--------------------------------------------------------------------------------------------------------
+availabilityAnli
+------------------------
+a1.sources = r1
+a1.sinks = k1 k2
+a1.channels = c1 c2
+# 指定 接收器组 sinkgroups
+# 配置接收器内容
+a1.sinkgroups = g1
+a1.sinkgroups.g1.sinks = k1 k2
+
+#组件类型名称需要是default，failover或load_balance
+#处理的类型是failover
+a1.sinkgroups.g1.processor.type = failover
+#设置sink优先级
+a1.sinkgroups.g1.processor.priority.k1 = 5
+a1.sinkgroups.g1.processor.priority.k2 = 10
+#设置为10秒，失败的接收器的最大退避时间（以毫秒为单位）
+a1.sinkgroups.g1.processor.maxpenalty = 10000
+
+a1.sources.r1.type = syslogtcp
+a1.sources.r1.port = 6666
+a1.sources.r1.channels = c1 c2
+#  指定选择器为复制
+a1.sources.r1.selector.type = replicating
+
+a1.sinks.k1.type = avro
+a1.sinks.k1.channel = c1
+a1.sinks.k1.hostname = hadoop2
+a1.sinks.k1.port = 5555
+
+a1.sinks.k2.type = avro
+a1.sinks.k2.channel = c2
+a1.sinks.k2.hostname = hadoop1
+a1.sinks.k2.port = 5555
+
+a1.channels.c1.type = memory
+a1.channels.c1.capacity = 1000
+a1.channels.c1.transactionCapacity = 100
+
+a1.channels.c2.type = memory
+a1.channels.c2.capacity = 1000
+a1.channels.c2.transactionCapacity = 100
+
+
+---------------------availability Mode1
+availabilityMode1
+a1.sources=r1
+a1.channels=c1
+a1.sinks=s1
+a1.sources.r1.type=avro
+a1.sources.r1.port=5555
+a1.sources.r1.bind=hadoop1
+a1.channels.c1.type=memory
+a1.channels.c1.capacity=1000
+a1.channels.c1.transactionCapacity=100
+a1.channels.c1.keep-alive=3
+a1.channels.c1.byteCapacityBufferPercentage = 20
+a1.channels.c1.byteCapacity = 800000
+a1.sinks.s1.type =logger
+a1.sources.r1.channels=c1
+a1.sinks.s1.channel=c1
+--------------------------availbility Mode2
+a1.sources=r1
+a1.channels=c1
+a1.sinks=s1
+a1.sources.r1.type=avro
+a1.sources.r1.port=5555
+a1.sources.r1.bind=hadoop2
+a1.channels.c1.type=memory
+a1.channels.c1.capacity=1000
+a1.channels.c1.transactionCapacity=100
+a1.channels.c1.keep-alive=3
+a1.channels.c1.byteCapacityBufferPercentage = 20
+a1.channels.c1.byteCapacity = 800000
+a1.sources.r1.channels=c1
+a1.sinks.s1.channel=c1
+a1.sinks.s1.type = hdfs
+a1.sinks.s1.hdfs.path =/flume/eventAVA/%y-%m-%d
+a1.sinks.s1.hdfs.filePrefix = event-
+a1.sinks.s1.hdfs.fileSuffix=.log
+a1.sinks.s1.hdfs.inUseSuffix=.tmp
+a1.sinks.s1.hdfs.useLocalTimeStamp=true
+
+------------------------------------------启动
+先启动落地 
+hadoop1
+flume-ng agent -c ../conf/  -f availabilityMode1  -n a1 -Dflume.root.logger=INFO,console
+hadoop2
+flume-ng agent -c ../conf/  -f availabilityMode2  -n a1 -Dflume.root.logger=INFO,console
+启动收集
+hadoop3
+../bin/flume-ng agent -c ../conf/  -f ./availabilityAnli  -n a1 -Dflume.root.logger=INFO,console
+向hadoop3 中发送内容 
+echo "gky111o"| nc localhost 6666
+hadoop1中打印日志
+然后将hadoop1 ctrlD 
+数据沉淀到hadoop2 可以在hadoop2中文件系统中查看 
