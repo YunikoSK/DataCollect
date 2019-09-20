@@ -1,0 +1,33 @@
+exec2loggerregex.conf
+a1.sources=r1
+a1.channels=c1
+a1.sinks=s1
+
+a1.sources.r1.type=exec
+a1.sources.r1.command= tail -f  /home/hadoop/flume-1.6.0/res
+a1.sources.r1.interceptors = i1
+a1.sources.r1.interceptors.i1.type = regex_filter
+//定义正则 以数字开头
+a1.sources.r1.interceptors.i1.regex=^[0-9].*$
+# 默认为false 收集匹配到的事件。如果为true，则会删除匹配到的event，收集未匹配到的
+a1.sources.r1.interceptors.i1.excludeEvents=false
+
+
+a1.channels.c1.type=memory
+a1.channels.c1.capacity=1000
+a1.channels.c1.transactionCapacity=100
+a1.channels.c1.keep-alive=3
+a1.channels.c1.byteCapacityBufferPercentage = 20
+a1.channels.c1.byteCapacity = 800000
+a1.sinks.s1.type = logger
+a1.sources.r1.channels=c1
+a1.sinks.s1.channel=c1
+
+启动 
+flume-ng agent -c ../conf/ -f ../example/exec2loggerregex.conf  -n a1 -Dflume.root.logger=INFO,console
+输入以数字开头的 
+echo "200 sfsf">>/home/hadoop/flume-1.6.0/res
+日志打印可以被收集
+不以数字开头的 
+echo "sfsf">>/home/hadoop/flume-1.6.0/res
+日志不打印 不收集
