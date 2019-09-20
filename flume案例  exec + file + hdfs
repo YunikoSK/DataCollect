@@ -1,0 +1,44 @@
+Flume安装完毕
+--------------------------------------------------
+execFileHdfs.conf
+
+a1.sources = r1
+a1.channels = c1
+a1.sinks = s1
+
+a1.sources.r1.type = exec
+a1.sources.r1.command = tail -f /home/hadoop/flume-1.6.0/res
+
+a1.channels.c1.type = file
+# 提前将检查点目录以及数据目录创建好
+a1.channels.c1.checkpointDir = /home/hadoop/flume-1.6.0/checkpointdir
+a1.channels.c1.dataDirs = /home/hadoop/flume-1.6.0/flumedata
+
+a1.sinks.s1.type = hdfs
+a1.sinks.s1.hdfs.path = /flume/eventsinks/%y-%m-%d/%H%M/%S
+# 指定文件前后缀
+a1.sinks.s1.hdfs.filePrefix = yuniko-
+a1.sinks.s1.hdfs.fileSuffix = .log
+# 指定正在使用的文件的前后缀
+a1.sinks.s1.hdfs.inUseSuffix = .tmp
+
+a1.sinks.s1.hdfs.rollInterval = 2
+a1.sinks.s1.hdfs.rollSize = 1024
+a1.sinks.s1.hdfs.fileType = DataStream
+# 序列文件记录的格式。一个文本或可写。在使用Flume创建数据文件之前设置为Text，
+# 否则Apache Impala（孵化）或Apache Hive无法读取这些文件。
+a1.sinks.s1.hdfs.writeFormat = Text
+# 是否应将时间戳向下舍入（如果为true，则影响除％t之外的所有基于时间的转义序列）
+a1.sinks.s1.hdfs.round = true
+a1.sinks.s1.hdfs.roundValue = 1
+a1.sinks.s1.hdfs.roundUnit = second
+#替换转义序列时，请使用本地时间（而不是事件头中的时间戳）。
+a1.sinks.s1.hdfs.useLocalTimeStamp = true
+a1.sources.r1.channels = c1
+a1.sinks.s1.channel = c1
+
+执行 
+flume-ng agent -c ../conf/ -f ../example/execFileHdfs.conf  -n a1 -Dflume.root.logger=INFO,console
+使用echo “内容 ”>> /home/hadoop/flume-1.6.0/res 
+观察检查点目录 /home/hadoop/flume-1.6.0/res   检查点数据目录 /home/hadoop/flume-1.6.0/res
+观察hdfs上的目录  /flume/eventsinks/%y-%m-%d/%H%M/%S 
