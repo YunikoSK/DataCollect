@@ -1,0 +1,42 @@
+flume 案例 sqoopdir + memory + logger
+a1.sources = r1
+a1.channels = c1
+a1.sinks = s1
+# 指定源为spoolDir下面参数时当类型为spoolDir时的指定参数
+a1.sources.r1.type = spoolDir
+
+# 指定监视的文件目录
+a1.sources.r1.spoolDir = /home/hadoop/flume-1.6.0/resdir
+
+# 是否添加存储绝对路径文件名的头文件。
+a1.sources.r1.fileHeader = true
+
+# 将绝对路径文件名附加到事件标题时使用的标题键。
+a1.sources.r1.fileHeaderKey = file
+
+a1.channels.c1.type = memory
+a1.channels.c1.capacity = 1000
+a1.channels.c1.transactionCapacity = 100
+
+# 添加或删除事件的超时（以秒为单位）
+a1.channels.c1.keep-alive = 3
+# 定义byteCapacity与通道中所有事件的估计总大小之间的缓冲区百分比，以计算标头中的数据。
+# 见byteCapacity 属性
+a1.channels.c1.byteCapacityBufferPercentage = 20
+
+# 允许的最大内存的总字节数作为此通道所有的事件的总和 该实现仅计算Event 主体，
+# 这也是提供byteCapacityBufferPercentage配置参数的原因。默认为JVM可用的最大内存的80％
+a1.channels.c1.byteCapacity = 800000
+
+a1.sinks.s1.type = logger
+a1.sources.r1.channels = c1
+a1.sinks.s1.channel = c1
+-------------------------------------------
+执行
+flume-ng agent -c ../conf/ -f ../example/spoolDir2logger.conf  -n a1 -Dflume.root.logger=INFO,console
+
+改变目录中的文件数量   
+/home/hadoop/flume-1.6.0/resdir
+可以通过移动 创建 都可以 
+flume 3秒浏览一次打印日志在控制台 
+浏览过的文件会打上 .COMPLETED
