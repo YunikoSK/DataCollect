@@ -1,0 +1,51 @@
+a1.sources = r1
+a1.sinks = k1
+a1.channels = c1
+# 执行源
+a1.sources.r1.type = exec
+# 启动时运行的命令 
+a1.sources.r1.command = tail -f /home/hadoop/flume-1.6.0/res
+
+# 指定下沉类型 
+a1.sinks.k1.type = hdfs
+
+# 指定输出文件类型 
+a1.sinks.k1.hdfs.path = /flume/events/date=%y-%m-%d
+
+# 指定输出文件前缀
+a1.sinks.k1.hdfs.filePrefix = events-
+
+# 开启hdfs 回滚 
+a1.sinks.k1.hdfs.round = true
+
+# 指定回滚值 
+a1.sinks.k1.hdfs.roundValue = 10
+
+# 指定回滚单位 为分钟 
+a1.sinks.k1.hdfs.roundUnit = minute
+
+# 替换转义序列时，请使用本地时间（而不是事件头中的时间戳）  替换如上 date=%y-%m-%d
+a1.sinks.k1.hdfs.useLocalTimeStamp = true
+
+#指定文件格式：当前SequenceFile，DataStream或CompressedStream 
+#（1）DataStream不会压缩输出文件，请不要设置codeC
+#（2）CompressedStream需要使用可用的codeC设置hdfs.codeC
+# hdfs.codeC  压缩编解码器。以下之一：gzip，bzip2，lzo，lzop，snappy
+a1.sinks.k1.hdfs.fileType = DataStream
+
+# 指定通道为内存
+a1.channels.c1.type = memory
+
+#通道中存储的最大事件数
+a1.channels.c1.capacity = 10000
+
+# 每个事务通道从源或提供给接收器的最大事件数
+a1.channels.c1.transactionCapacity = 10000
+
+a1.sources.r1.channels = c1
+a1.sinks.k1.channel = c1
+执行 
+ flume-ng agent -c ../conf/ -f ../example/exe2hdfs.conf -n a1 -Dflume.root.logger=INFO,console
+
+使用 echo "内容">> /home/hadoop/flume-1.6.0/res 不停地向res文件追加内容
+hdfs目录上会产生.tmp文件 在定时回滚
