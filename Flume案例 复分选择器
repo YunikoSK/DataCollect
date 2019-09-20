@@ -1,0 +1,60 @@
+# 对于不满足映射的日志内容 不要
+exec2loggerOrhdfsMUL.conf
+
+a1.sources=r1
+a1.channels=c1 c2
+a1.sinks=s1 s2
+
+a1.sources.r1.type=org.apache.flume.source.http.HTTPSource
+a1.sources.r1.port=6666
+a1.sources.r1.bind=hadoop1
+# 指定复分选择器
+a1.sources.r1.selector.type = multiplexing
+#  指定选择器头结点标识 状态 status  通过发送http头部的status值来 确定发往哪个通道 
+a1.sources.r1.selector.header = status
+
+# 指定分流 匹配 CZ 为c1  US为 c2
+a1.sources.r1.selector.mapping.CZ = c1
+a1.sources.r1.selector.mapping.US = c2
+a1.sources.r1.selector.default = c1
+
+a1.channels.c1.type = memory
+a1.channels.c1.capacity=1000
+a1.channels.c1.transactionCapacity=100
+a1.channels.c1.keep-alive=3
+a1.channels.c1.byteCapacityBufferPercentage = 20
+a1.channels.c1.byteCapacity = 800000
+
+a1.channels.c2.type=memory
+a1.channels.c2.capacity=1000
+a1.channels.c2.transactionCapacity=100
+a1.channels.c2.keep-alive=3
+a1.channels.c2.byteCapacityBufferPercentage = 20
+a1.channels.c2.byteCapacity = 800000
+
+a1.sinks.s1.type = logger
+
+a1.sinks.s2.type = hdfs
+a1.sinks.s2.hdfs.path =/flume/eventMUL/%y-%m-%d
+a1.sinks.s2.hdfs.filePrefix = event-
+a1.sinks.s2.hdfs.fileSuffix=.log
+a1.sinks.s2.hdfs.inUseSuffix=.tmp
+a1.sinks.s2.hdfs.rollInterval=2
+a1.sinks.s2.hdfs.rollSize=1024
+a1.sinks.s2.hdfs.fileType=DataStream
+a1.sinks.s2.hdfs.writeFormat=Text
+a1.sinks.s2.hdfs.round = true
+a1.sinks.s2.hdfs.roundValue = 1
+a1.sinks.s2.hdfs.roundUnit = second
+a1.sinks.s2.hdfs.useLocalTimeStamp=true
+
+a1.sources.r1.channels=c1 c2
+a1.sinks.s1.channel=c1
+a1.sinks.s2.channel=c2
+启动
+ flume-ng agent -c ../conf/ -f ../example/exec2loggerOrhdfsMUL.conf  -n a1 -Dflume.root.logger=INFO,console
+发送http协议  观察 hdfs的内容 以及控制台 对于c2的输出
+curl -X POST -d '[{"headers":{"status":"2017-06-13"},"body":"this is default"}]' http://hadoop1:6666
+curl -X POST -d '[{"headers":{"status":"CZ"},"body":"this is CZ"}]' http://hadoop1:6666
+curl -X POST -d '[{"headers":{"status":"US"},"body":"this is US"}]' http://hadoop1:6666
+curl -X POST -d '[{"headers":{"status":"ss"},"body":"this is ss"}]' http://hadoop1:6666
