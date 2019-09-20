@@ -1,0 +1,69 @@
+拦截器
+案例 
+主机拦截器 静态拦截器 时间撮拦截器 
+
+exec2hdfsinter.conf
+
+a1.sources=r1
+a1.channels=c1
+a1.sinks=s1
+
+a1.sources.r1.type=exec
+a1.sources.r1.command = tail -f /home/hadoop/flume-1.6.0/res
+a1.sources.r1.interceptors = i1 i2 i3
+
+# 此拦截器将事件标头插入到事件标头中，以毫秒为单位处理事件。
+# 此拦截器插入带有键时间戳（或由header属性指定）的标头，其值为相关时间戳。
+# 如果已在配置中存在，则此拦截器可以保留现有时间戳。 最常用
+a1.sources.r1.interceptors.i1.type = timestamp
+
+a1.sources.r1.interceptors.il.preserveExisting = true
+
+
+# 此拦截器插入运行此代理程序的主机的主机名或IP地址。
+a1.sources.r1.interceptors.i2.type = host
+a1.sources.r1.interceptors.i2.hostHeader = hostname
+a1.sources.r1.interceptors.i2.preserveExisting = true
+
+# 静态拦截器可以简单的将固定报头的键和值插入拦截的每个事件中。
+a1.sources.r1.interceptors.i3.type = static
+a1.sources.r1.interceptors.i3.key = author
+a1.sources.r1.interceptors.i3.value = Yuniko
+
+a1.channels.c1.type = memory
+a1.channels.c1.capacity = 1000
+a1.channels.c1.transactionCapacity = 100
+a1.channels.c1.keep-alive = 3
+a1.channels.c1.byteCapactiyBufferPercentage = 20
+a1.channels.c1.byteCapacity = 800000
+
+a1.sinks.s1.type = hdfs
+a1.sinks.s1.hdfs.path = /flume/eventsInterceptors1/%y-%m-%d/%H%M/%S
+# 将主机拦截器 和 静态拦截器 引入
+a1.sinks.s1.hdfs.filePrefix = %{hostname}-%{author}
+a1.sinks.s1.hdfs.fileSuffix=.log
+a1.sinks.s1.hdfs.inUseSuffix=.tmp
+# 滚动当前文件之前等待的秒数（0 =根据时间间隔从不滚动）
+a1.sinks.s1.hdfs.rollInterval=2
+# 触发滚动的文件大小，以字节为单位（0：永不基于文件大小滚动
+a1.sinks.s1.hdfs.rollSize=1024
+# 在滚动之前写入文件的事件数（0 =从不基于事件数滚动）
+a1.sinks.s1.hdfs.rollCount = 10
+
+a1.sinks.s1.hdfs.fileType=DataStream
+a1.sinks.s1.hdfs.writeFormat=Text
+# 对时间戳的舍入处理
+a1.sinks.s1.hdfs.round = true
+a1.sinks.s1.hdfs.roundValue = 1
+a1.sinks.s1.hdfs.roundUnit = second
+a1.sinks.s1.hdfs.useLocalTimeStamp=false
+
+a1.sources.r1.channels = c1
+a1.sinks.s1.channel = c1
+---------------------------------------------------------------
+启动 
+ flume-ng agent -c ../conf/ -f ../example/exec2hdfsinter.conf  -n a1 -Dflume.root.logger=INFO,console
+
+使用 echo "内容 ">> /home/hadoop/flume-1.6.0/res
+
+观察日志的打印 以及 hdfs上 封装的目录
