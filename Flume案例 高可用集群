@@ -37,7 +37,7 @@ a1.sinks.k2.type = avro
 a1.sinks.k2.channel = c2
 a1.sinks.k2.hostname = hadoop1
 a1.sinks.k2.port = 5555
-
+//一个sink只能对应一个通道 一个通道可以被多个sink绑定
 a1.channels.c1.type = memory
 a1.channels.c1.capacity = 1000
 a1.channels.c1.transactionCapacity = 100
