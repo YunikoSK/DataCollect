@@ -1,6 +1,6 @@
 Flume 
 >>高可用的，高可靠的，分布式的海量日志采集、聚合和传输的系统
-
+>>不能多个channel对应一个sink
 flume组件
 source ： 数据源组件，专门读取相对应的数据，并将数据传到channel中.
 channel : 管道，用于连接source和sink
