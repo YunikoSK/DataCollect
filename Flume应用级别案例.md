@@ -156,12 +156,13 @@ a1.sinks.k1.hdfs.filePrefix=%Y-%m-%d
 
 > 1.启动顺序不能错误
 >
-> 2.注意设置sink端的 收集设置 
+> 2.flume源码只能监听一级目录下的内容 对于二级目录无法监听 在使用时只能将文件放入,放入文件夹没有作用
 >
+> 3.注意设置sink端的 收集设置 
 > a1.sinks.k1.hdfs.rollInterval=0   // hdfs sink间隔多长将临时文件滚动成最终目标文件
 > a1.sinks.k1.hdfs.rollCount=0   //当events数据达到该数量时候，将临时文件滚动成目标文件
 > a1.sinks.k1.hdfs.rollSize=134217700 //当临时文件达到该大小（单位：bytes）时，滚动成目标文件；
 >
-> 3.往/home/data/yuniko_flume_text/ source目录里放文件（不能是文件夹）
+> 4.往/home/data/yuniko_flume_text/ source目录里放文件（不能是文件夹）
 >
-> 4.如果报错event 失败  修改参数 agent1.channels.c1.byteCapacity=800000
+> 5.如果报错event 失败  修改参数 agent1.channels.c1.byteCapacity=800000
